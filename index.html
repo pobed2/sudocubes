@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Sudocubes by pobed2</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Sudocubes</h1>
+          <h2>&quot;3D&quot; sudoku image extractor and solver</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/pobed2/sudocubes/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/pobed2/sudocubes/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/pobed2/sudocubes" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>
+<a name="sudocubes" class="anchor" href="#sudocubes"><span class="octicon octicon-link"></span></a>Sudocubes</h1>
+
+<p>The goal of this project is to extract data from "3D" sudoku images, and solve them. This was used for a project for which we had a robot that had to navigate to a sudoku image, extract the data, solve the puzzle and then draw the digit that is supposed to be in the sudoku's red square.</p>
+
+<p>Here's what a "3D" sudoku looks like.</p>
+
+<p><img src="https://raw.github.com/pobed2/sudocubes/master/images/cube_front1.jpg" alt="Sudocube" width=" 200px"></p>
+
+<p>The sudokus are constructed as 3 4x4 grid of numbers. Just like a regular sudoku, the same number cannot appear twice in the same row, the same column and, in this case, the same blue rectangle.</p>
+
+<h1>
+<a name="the-algorithm" class="anchor" href="#the-algorithm"><span class="octicon octicon-link"></span></a>The Algorithm</h1>
+
+<p>There are two main parts to the algorithm solving this problem. The first one extracts the data from the image, while the second solves the puzzle.</p>
+
+<h2>
+<a name="extracting-the-data" class="anchor" href="#extracting-the-data"><span class="octicon octicon-link"></span></a>Extracting the Data</h2>
+
+<h3>
+<a name="unwarping" class="anchor" href="#unwarping"><span class="octicon octicon-link"></span></a>Unwarping</h3>
+
+<p>First of all, we have to keep in mind that the images of the sudokus come from a robot that had to navigate a long way    to get there. Therefore, we cannot guarantee that the image will be perfect. We have to take into account that the        sudoku will be warped and that we may even get other stuff in the picture.</p>
+
+<p>With that in mind, the first step of the process is to unwarp the image, in order to get a consistent image even if the   robot was slightly off its course. To do so, we are lucky enough to have a green square around the puzzle. All we have    to do is get the four corners of this square, and unwarp the square.</p>
+
+<p>Here's an example of how that's done (in strange pinkinsh colors...)</p>
+
+<p><img src="https://raw.github.com/pobed2/sudocubes/master/images/begin.png" alt="Sudocube" width=" 200px"><img src="https://raw.github.com/pobed2/sudocubes/master/images/begin-square.png" alt="Sudocube" width=" 200px"><img src="https://raw.github.com/pobed2/sudocubes/master/images/unwarped.png" alt="Sudocube" width=" 200px"></p>
+
+<h3>
+<a name="finding-the-corners" class="anchor" href="#finding-the-corners"><span class="octicon octicon-link"></span></a>Finding the corners</h3>
+
+<p>We then have to find the corners to the "box". Doing so will enable us to define the puzzle's boundaries and the placement of the digits' squares. To do so, we have to use a few tricks.</p>
+
+<ol>
+<li>We first isolate the puzzle's box by its color.</li>
+<li>Then, we use OpenCV's power to find possible corners.</li>
+<li>
+<p>By simple geometry, we are able to find the best matches for possible corners.</p>
+
+<p><img src="https://raw.github.com/pobed2/sudocubes/master/images/lines.png" alt="Sudocube" width=" 200px"><img src="https://raw.github.com/pobed2/sudocubes/master/images/all-points.png" alt="Sudocube" width=" 200px"><img src="https://raw.github.com/pobed2/sudocubes/master/images/corners.png" alt="Sudocube" width=" 200px"></p>
+</li>
+</ol><h3>
+<a name="extracting-the-digits" class="anchor" href="#extracting-the-digits"><span class="octicon octicon-link"></span></a>Extracting the digits</h3>
+
+<p>Once we have the box's corners, it's a simple matter of geometry to find the possible places where digits might be. Therefore, the harder part is to actually get the right digit from the image. </p>
+
+<p>In order to keep it simple, we simply trained a regular classifier using the k-nearest neighboors algorithm. To do so, we fed the classifier a series a images containing digits that were manually identified beforehand. This enabled the classifier to compare the digits in the puzzle to the digits it already knew. Because it is a simple OCR problem (same font, same size), the KNN classifier works like a charm.</p>
+
+<h2>
+<a name="solving-the-sudoku" class="anchor" href="#solving-the-sudoku"><span class="octicon octicon-link"></span></a>Solving the sudoku</h2>
+
+<p>Sudoku solving solutions are abundant on the Internet. However, this particular puzzle is quite different from a regular sudoku. Therefore, we had to write a specific solving algorithm.</p>
+
+<p>The algorithm used is largely based on a sudoku solving algorithm written by Peter Norvig. We were able to reuse a sudoky solving algorithm because both sukodus and "3D" sudokus are constraint satisfaction problems. Therefore, all we had to do was modify the constraints. The algorithm works in two ways.</p>
+
+<ol>
+<li>Constraints are propagated troughout the problem set to find a solution</li>
+<li>Depth first searches aretried, whenever we try a new solution.</li>
+</ol><p>A solution is usually found within a few milliseconds (on the robot's computer: an old mac mini).</p>
+        </section>
+
+        <footer>
+          Sudocubes is maintained by <a href="https://github.com/pobed2">pobed2</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
