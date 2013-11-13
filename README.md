@@ -39,3 +39,19 @@ Extracting the Data
   <img src="https://raw.github.com/pobed2/sudocubes/master/images/lines.png" alt="Sudocube" width=" 200px" float="left"/>
   <img src="https://raw.github.com/pobed2/sudocubes/master/images/all-points.png" alt="Sudocube" width=" 200px"           float="left"/>
   <img src="https://raw.github.com/pobed2/sudocubes/master/images/corners.png" alt="Sudocube" width=" 200px" float="left"/>
+
+### Extracting the digits
+  Once we have the box's corners, it's a simple matter of geometry to find the possible places where digits might be. Therefore, the harder part is to actually get the right digit from the image. 
+  
+  In order to keep it simple, we simply trained a regular classifier using the k-nearest neighboors algorithm. To do so, we fed the classifier a series a images containing digits that were manually identified beforehand. This enabled the classifier to compare the digits in the puzzle to the digits it already knew. Because it is a simple OCR problem (same font, same size), the KNN classifier works like a charm.
+  
+Solving the sudoku
+------------------
+Sudoku solving solutions are abundant on the Internet. However, this particular puzzle is quite different from a regular sudoku. Therefore, we had to write a specific solving algorithm.
+
+The algorithm used is largely based on a sudoku solving algorithm written by Peter Norvig. We were able to reuse a sudoky solving algorithm because both sukodus and "3D" sudokus are constraint satisfaction problems. Therefore, all we had to do was modify the constraints. The algorithm works in two ways.
+  1. Constraints are propagated troughout the problem set to find a solution
+  2. Depth first searches aretried, whenever we try a new solution.
+
+A solution is usually found within a few milliseconds (on the robot's computer: an old mac mini).
+
