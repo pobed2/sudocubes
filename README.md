@@ -55,3 +55,7 @@ The algorithm used is largely based on a sudoku solving algorithm written by Pet
 
 A solution is usually found within a few milliseconds on the robot's computer (an old mac mini).
 
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/pobed2/sudocubes/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
